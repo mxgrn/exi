@@ -20,6 +20,11 @@ defmodule ExiWeb.Router do
     get "/", PageController, :index
   end
 
+  scope "/telegram", ExiWeb do
+    pipe_through :api
+    post "/", TelegramBotController, :callback
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", ExiWeb do
   #   pipe_through :api
