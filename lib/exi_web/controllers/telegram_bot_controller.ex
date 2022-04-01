@@ -120,7 +120,23 @@ defmodule ExiWeb.TelegramBotController do
 
   ## Someone posts a message:
 
-  %{"message" => %{"chat" => %{"id" => -1001712912115, "title" => "Exi Days", "type" => "supergroup"}, "date" => 1648282720, "from" => %{"first_name" => "Max", "id" => 2144377, "is_bot" => false, "language_code" => "en", "last_name" => "Grin", "username" => "mxgrn"}, "message_id" => 2, "text" => "foo"}, "update_id" => 859434146}
+  %{
+    "message" => %{
+      "chat" => %{"id" => -1_001_712_912_115, "title" => "Exi Days", "type" => "supergroup"},
+      "date" => 1_648_282_720,
+      "from" => %{
+        "first_name" => "Max",
+        "id" => 2_144_377,
+        "is_bot" => false,
+        "language_code" => "en",
+        "last_name" => "Grin",
+        "username" => "mxgrn"
+      },
+      "message_id" => 2,
+      "text" => "foo"
+    },
+    "update_id" => 859_434_146
+  }
 
   ## New group member joins
 

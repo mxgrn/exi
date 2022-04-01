@@ -1,6 +1,6 @@
 defmodule Exi.Telegram do
   @moduledoc """
-  Context related to Telegram info, such as users and groups.
+  Context for Telegram-resources such as groups and users.
   """
 
   alias Exi.Repo
@@ -8,25 +8,46 @@ defmodule Exi.Telegram do
   alias Exi.Telegram.User
   alias Exi.Telegram.GroupUser
 
-  def upsert_group(%{"id" => telegram_id}) do
-    Repo.insert(%Group{telegram_id: abs(telegram_id)}, on_conflict: :nothing)
+  def ensure_group(data) do
+    ensure_resource(Group, data)
   end
 
-  def upsert_user_and_add_to_group(%{"id" => user_telegram_id, "username" => username}, %{
-        "id" => group_telegram_id
-      }) do
-    user = upsert(User, %{telegram_id: user_telegram_id, username: username})
-    group = upsert(Group, %{telegram_id: abs(group_telegram_id)})
+  def ensure_user_in_group(data, group) do
+    user = ensure_resource(User, data)
 
-    Repo.insert(%GroupUser{user_id: user.id, group_id: group.id}, on_conflict: :nothing)
+    group_user = ensure_resource(GroupUser, %{group_id: group.id, user_id: user.id})
+
+    %{user: user, group_user: group_user}
   end
 
-  defp upsert(schema, %{telegram_id: telegram_id} = data) do
+  # DELETE
+  def upsert(schema, %{telegram_id: telegram_id} = data) do
     schema
     |> Repo.get_by(%{telegram_id: telegram_id})
     |> case do
       nil ->
         schema |> struct(data) |> Repo.insert!()
+
+      record ->
+        record
+    end
+  end
+
+  def ensure_resource(GroupUser, %{user_id: user_id, group_id: group_id} = data) do
+    do_ensure_resource(GroupUser, %{user_id: user_id, group_id: group_id}, data)
+  end
+
+  def ensure_resource(schema, %{"id" => id} = data) do
+    do_ensure_resource(schema, %{telegram_id: id}, Map.merge(data, %{"telegram_id" => id}))
+  end
+
+  defp do_ensure_resource(schema, get_by, data) do
+    schema
+    |> Repo.get_by(get_by)
+    |> case do
+      nil ->
+        schema.changeset(struct(schema, %{}), data)
+        |> Repo.insert!()
 
       record ->
         record
