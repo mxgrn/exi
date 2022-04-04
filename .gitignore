@@ -32,3 +32,5 @@ exi-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Local config
+/config/*.local.exs
