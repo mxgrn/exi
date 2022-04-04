@@ -8,12 +8,16 @@ defmodule Exi.Telegram do
   alias Exi.Telegram.User
   alias Exi.Telegram.GroupUser
 
-  def ensure_group(data) do
-    ensure_resource(Group, data)
+  def get_group(id) do
+    Repo.get(Group, id)
   end
 
-  def ensure_user_in_group(data, group) do
-    user = ensure_resource(User, data)
+  def ensure_group(attrs) do
+    ensure_resource(Group, attrs)
+  end
+
+  def ensure_user_in_group(attrs, group) do
+    user = ensure_resource(User, attrs)
 
     group_user = ensure_resource(GroupUser, %{group_id: group.id, user_id: user.id})
 
@@ -21,36 +25,63 @@ defmodule Exi.Telegram do
   end
 
   # DELETE
-  def upsert(schema, %{telegram_id: telegram_id} = data) do
+  def upsert(schema, %{telegram_id: telegram_id} = attrs) do
     schema
     |> Repo.get_by(%{telegram_id: telegram_id})
     |> case do
       nil ->
-        schema |> struct(data) |> Repo.insert!()
+        schema |> struct(attrs) |> Repo.insert!()
 
       record ->
         record
     end
   end
 
-  def ensure_resource(GroupUser, %{user_id: user_id, group_id: group_id} = data) do
-    do_ensure_resource(GroupUser, %{user_id: user_id, group_id: group_id}, data)
+  def ensure_resource(GroupUser, %{user_id: user_id, group_id: group_id} = attrs) do
+    do_ensure_resource(GroupUser, %{user_id: user_id, group_id: group_id}, attrs)
   end
 
-  def ensure_resource(schema, %{"id" => id} = data) do
-    do_ensure_resource(schema, %{telegram_id: id}, Map.merge(data, %{"telegram_id" => id}))
+  def ensure_resource(schema, %{"id" => id} = attrs) do
+    do_ensure_resource(schema, %{telegram_id: id}, Map.merge(attrs, %{"telegram_id" => id}))
   end
 
-  defp do_ensure_resource(schema, get_by, data) do
+  defp do_ensure_resource(schema, get_by, attrs) do
     schema
     |> Repo.get_by(get_by)
     |> case do
       nil ->
-        schema.changeset(struct(schema, %{}), data)
-        |> Repo.insert!()
+        create_resource(schema, attrs)
 
       record ->
         record
     end
+  end
+
+  defp create_resource(Group, attrs) do
+    group = do_create_resource(Group, attrs)
+    schedule_hourly_reminders(group)
+  end
+
+  defp create_resource(schema, attrs) do
+    do_create_resource(schema, attrs)
+  end
+
+  defp do_create_resource(schema, attrs) do
+    schema.changeset(struct(schema, %{}), attrs)
+    |> Repo.insert!()
+  end
+
+  def schedule_hourly_reminders(%{id: group_id}) do
+    next_hour = %{
+      (DateTime.utc_now()
+       |> DateTime.add(60 * 60, :second))
+      | minute: 0,
+        second: 0,
+        microsecond: {0, 0}
+    }
+
+    %{group_id: group_id}
+    |> Exi.EntryReminder.new(scheduled_at: next_hour)
+    |> Oban.insert()
   end
 end
