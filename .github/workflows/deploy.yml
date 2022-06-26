@@ -1,0 +1,74 @@
+name: Production
+
+on: 
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    name: Deploy
+    strategy:
+      matrix:
+        app: [exi]
+        env: [prod]
+        os: [ubuntu-18.04]
+        otp: [25.0.2]
+        elixir: [1.13.4]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log into GHCR
+        run: echo "${{secrets.GITHUB_TOKEN}}" | docker login https://ghcr.io -u ${{github.actor}} --password-stdin
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/mxgrn/exi:latest
+
+      - name: Pull image on host, restart, run migrations
+        uses: appleboy/ssh-action@master
+        # env:
+        #   SECRET_KEY_BASE: ${{secrets.SECRET_KEY_BASE}}
+        #   DATABASE_URL: ${{secrets.DATABASE_URL}}
+        with:
+          host: 159.89.18.195
+          username: deploy
+          key: ${{ secrets.DEPLOYMENT_KEY }}
+          envs: SECRET_KEY_BASE,DATABASE_URL
+          script_stop: true
+          script: |
+            docker pull ghcr.io/mxgrn/exi
+            docker stop exi_prod || true
+            docker run -d --rm -e SECRET_KEY_BASE=${{secrets.SECRET_KEY_BASE}} -e DATABASE_URL=${{secrets.DATABASE_URL}} ghcr.io/mxgrn/exi /app/bin/migrate
+            docker run --name=exi_prod -d --rm -p 8020:4000 -e PHX_SERVER=true -e SECRET_KEY_BASE=${{secrets.SECRET_KEY_BASE}} -e DATABASE_URL=${{secrets.DATABASE_URL}} ghcr.io/mxgrn/exi
+
+    # WORKS
+    # - uses: actions/checkout@v3
+    # - name: Build Docker image
+    #   run: docker build -t ghcr.io/mxgrn/exi .
+    # - name: Log into GHCR
+    #   run: echo "${{secrets.GITHUB_TOKEN}}" | docker login https://ghcr.io -u ${{github.actor}} --password-stdin
+    # - name: Push image to GHCR
+    #   run: |
+    #     IMAGE_ID=exi
+    #     docker push ghcr.io/mxgrn/exi:latest
+
+    # MAY BE NEEDED IN THE FUTURE (WORKS)
+    # - name: copy code via ssh to prod host
+    #   uses: appleboy/scp-action@master
+    #   with:
+    #     key: ${{ secrets.DEPLOYMENT_KEY }}
+    #     username: deploy
+    #     host: 159.89.18.195
+    #     source: .
+    #     target: ${{ matrix.app }}_${{matrix.env}}
