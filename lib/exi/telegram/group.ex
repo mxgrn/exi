@@ -1,8 +1,12 @@
 defmodule Exi.Telegram.Group do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Exi.Telegram.GroupUser
 
   schema "groups" do
+    has_many :group_users, GroupUser
+    has_many :users, through: [:group_users, :user]
+
     field :telegram_id, :integer
 
     timestamps()

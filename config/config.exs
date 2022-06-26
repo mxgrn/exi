@@ -49,7 +49,14 @@ config :phoenix, :json_library, Jason
 
 config :exi, Oban,
   repo: Exi.Repo,
-  plugins: [Oban.Plugins.Pruner],
+  plugins: [
+    Oban.Plugins.Pruner,
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"0 21 * * *", Exi.DailySummaryWorker}
+       # {"* * * * *", Exi.DailySummaryWorker}
+     ]}
+  ],
   queues: [default: 10, events: 50, media: 20]
 
 # Import environment specific config. This must remain at the bottom

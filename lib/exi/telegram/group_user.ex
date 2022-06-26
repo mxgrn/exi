@@ -1,10 +1,12 @@
 defmodule Exi.Telegram.GroupUser do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Exi.Telegram.User
+  alias Exi.Telegram.Group
 
   schema "group_users" do
-    field :group_id, :id
-    field :user_id, :id
+    belongs_to :group, Group
+    belongs_to :user, User
 
     timestamps()
   end

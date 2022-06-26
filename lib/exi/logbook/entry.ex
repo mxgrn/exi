@@ -1,10 +1,11 @@
 defmodule Exi.Logbook.Entry do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Exi.Telegram.GroupUser
 
   schema "entries" do
+    belongs_to(:group_user, GroupUser)
     field :amount, :integer
-    field :group_user_id, :id
 
     timestamps()
   end

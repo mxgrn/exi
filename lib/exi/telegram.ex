@@ -7,9 +7,15 @@ defmodule Exi.Telegram do
   alias Exi.Telegram.Group
   alias Exi.Telegram.User
   alias Exi.Telegram.GroupUser
+  import Ecto.Query
 
   def get_group(id) do
     Repo.get(Group, id)
+  end
+
+  def list_groups() do
+    from(g in Group, preload: :users)
+    |> Repo.all()
   end
 
   def ensure_group(attrs) do
@@ -45,6 +51,20 @@ defmodule Exi.Telegram do
     do_ensure_resource(schema, %{telegram_id: id}, Map.merge(attrs, %{"telegram_id" => id}))
   end
 
+  def schedule_hourly_reminders(%{id: group_id}) do
+    next_hour = %{
+      (DateTime.utc_now()
+       |> DateTime.add(60 * 60, :second))
+      | minute: 0,
+        second: 0,
+        microsecond: {0, 0}
+    }
+
+    %{group_id: group_id}
+    |> Exi.EntryReminder.new(scheduled_at: next_hour)
+    |> Oban.insert()
+  end
+
   defp do_ensure_resource(schema, get_by, attrs) do
     schema
     |> Repo.get_by(get_by)
@@ -69,19 +89,5 @@ defmodule Exi.Telegram do
   defp do_create_resource(schema, attrs) do
     schema.changeset(struct(schema, %{}), attrs)
     |> Repo.insert!()
-  end
-
-  def schedule_hourly_reminders(%{id: group_id}) do
-    next_hour = %{
-      (DateTime.utc_now()
-       |> DateTime.add(60 * 60, :second))
-      | minute: 0,
-        second: 0,
-        microsecond: {0, 0}
-    }
-
-    %{group_id: group_id}
-    |> Exi.EntryReminder.new(scheduled_at: next_hour)
-    |> Oban.insert()
   end
 end
