@@ -78,8 +78,8 @@ defmodule Exi.Telegram do
   end
 
   defp create_resource(Group, attrs) do
-    group = do_create_resource(Group, attrs)
-    schedule_hourly_reminders(group)
+    _group = do_create_resource(Group, attrs)
+    # schedule_hourly_reminders(group)
   end
 
   defp create_resource(schema, attrs) do

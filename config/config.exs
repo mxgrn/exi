@@ -53,11 +53,13 @@ config :exi, Oban,
     Oban.Plugins.Pruner,
     {Oban.Plugins.Cron,
      crontab: [
-       {"0 21 * * *", Exi.DailySummaryWorker}
+       {"0 18 * * *", Exi.DailySummaryWorker}
        # {"* * * * *", Exi.DailySummaryWorker}
      ]}
   ],
   queues: [default: 10, events: 50, media: 20]
+
+config :tesla, adapter: Tesla.Adapter.Hackney
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
