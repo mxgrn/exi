@@ -63,6 +63,8 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
+  config :exi, :release_sha, System.get_env("GITHUB_SHA") || "?"
+
   # ## Configuring the mailer
   #
   # In production you need to configure the mailer to use a different adapter.

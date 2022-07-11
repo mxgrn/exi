@@ -28,12 +28,14 @@ jobs:
         run: echo "${{secrets.GITHUB_TOKEN}}" | docker login https://ghcr.io -u ${{github.actor}} --password-stdin
 
       - name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
-          context: .
-          file: ./Dockerfile
+          # context: .
+          # file: ./Dockerfile
           push: true
           tags: ghcr.io/mxgrn/exi:latest
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
 
       - name: Pull image on host, restart, run migrations
         uses: appleboy/ssh-action@master
@@ -50,7 +52,7 @@ jobs:
             docker pull ghcr.io/mxgrn/exi
             docker stop exi_prod || true
             docker run -d --rm -e SECRET_KEY_BASE=${{secrets.SECRET_KEY_BASE}} -e DATABASE_URL=${{secrets.DATABASE_URL}} ghcr.io/mxgrn/exi /app/bin/migrate
-            docker run --name=exi_prod -d --rm -p 8020:4000 -e PHX_SERVER=true -e SECRET_KEY_BASE=${{secrets.SECRET_KEY_BASE}} -e DATABASE_URL=${{secrets.DATABASE_URL}} ghcr.io/mxgrn/exi
+            docker run --name=exi_prod -d --rm -p 8020:4000 -e PHX_SERVER=true -e SECRET_KEY_BASE=${{secrets.SECRET_KEY_BASE}} -e DATABASE_URL=${{secrets.DATABASE_URL}} -e GITHUB_SHA=${{github.sha}} ghcr.io/mxgrn/exi
 
     # WORKS
     # - uses: actions/checkout@v3

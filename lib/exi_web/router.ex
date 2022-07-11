@@ -17,7 +17,7 @@ defmodule ExiWeb.Router do
   scope "/", ExiWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    get "/", HealthcheckController, :index
   end
 
   scope "/telegram", ExiWeb do
