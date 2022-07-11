@@ -64,6 +64,7 @@ if config_env() == :prod do
     secret_key_base: secret_key_base
 
   config :exi, :release_sha, System.get_env("GITHUB_SHA") || "?"
+  config :exi, :telegram_bot, token: System.get_env("TELEGRAM_BOT_TOKEN")
 
   # ## Configuring the mailer
   #
