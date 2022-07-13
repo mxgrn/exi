@@ -3,9 +3,9 @@ defmodule ExiWeb.TelegramBotControllerTest do
 
   alias Exi.Repo
   alias Exi.Logbook.Entry
-  alias Exi.Telegram.Group
-  alias Exi.Telegram.GroupUser
-  alias Exi.Telegram.User
+  alias Exi.Schemas.Group
+  alias Exi.Schemas.GroupUser
+  alias Exi.Schemas.User
 
   describe "logging" do
     test "creates group, user in group, and entry", %{conn: conn} do

@@ -4,7 +4,7 @@ defmodule Exi.DailySummaryWorker do
   alias Exi.Repo
   alias Exi.TelegramBot.Client
   alias Exi.Telegram
-  alias Exi.Telegram.GroupUser
+  alias Exi.Schemas.GroupUser
   alias Exi.Logbook.Entry
 
   import Ecto.Query

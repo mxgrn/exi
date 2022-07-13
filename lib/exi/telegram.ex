@@ -4,9 +4,9 @@ defmodule Exi.Telegram do
   """
 
   alias Exi.Repo
-  alias Exi.Telegram.Group
-  alias Exi.Telegram.User
-  alias Exi.Telegram.GroupUser
+  alias Exi.Schemas.Group
+  alias Exi.Schemas.User
+  alias Exi.Schemas.GroupUser
   import Ecto.Query
 
   def get_group(id) do
@@ -28,19 +28,6 @@ defmodule Exi.Telegram do
     group_user = ensure_resource(GroupUser, %{group_id: group.id, user_id: user.id})
 
     %{user: user, group_user: group_user}
-  end
-
-  # DELETE
-  def upsert(schema, %{telegram_id: telegram_id} = attrs) do
-    schema
-    |> Repo.get_by(%{telegram_id: telegram_id})
-    |> case do
-      nil ->
-        schema |> struct(attrs) |> Repo.insert!()
-
-      record ->
-        record
-    end
   end
 
   def ensure_resource(GroupUser, %{user_id: user_id, group_id: group_id} = attrs) do

@@ -1,7 +1,7 @@
-defmodule Exi.Telegram.User do
+defmodule Exi.Schemas.User do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Exi.Telegram.GroupUser
+  alias Exi.Schemas.GroupUser
 
   schema "users" do
     has_many :group_users, GroupUser
