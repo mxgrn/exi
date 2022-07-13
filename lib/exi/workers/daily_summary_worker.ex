@@ -23,7 +23,7 @@ defmodule Exi.DailySummaryWorker do
 
   def send_summary_to_group(group) do
     summary = """
-    Here's your summary for today:
+    Summary for today:
     #{summary_for_group(group)}
     """
 

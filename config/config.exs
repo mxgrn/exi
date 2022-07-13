@@ -50,11 +50,12 @@ config :phoenix, :json_library, Jason
 config :exi, Oban,
   repo: Exi.Repo,
   plugins: [
-    Oban.Plugins.Pruner,
+    # keep jobs for 1 year
+    {Oban.Plugins.Pruner, max_age: 365 * 24 * 60 * 60},
     {Oban.Plugins.Cron,
      crontab: [
        {"0 18 * * *", Exi.DailySummaryWorker}
-       # {"* * * * *", Exi.DailySummaryWorker}
+       # {"*/2 * * * *", Exi.DailySummaryWorker}
      ]}
   ],
   queues: [default: 10, events: 50, media: 20]
