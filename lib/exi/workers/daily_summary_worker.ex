@@ -22,17 +22,12 @@ defmodule Exi.DailySummaryWorker do
   end
 
   def send_summary_to_group(group) do
-    summary = summary_for_group(group)
+    summary = """
+    Here's your summary for today:
+    #{summary_for_group(group)}
+    """
 
-    Client.send_message(%{
-      text: "Here's your summary for today:",
-      chat_id: group.telegram_id
-    })
-
-    Client.send_message(%{
-      text: summary,
-      chat_id: group.telegram_id
-    })
+    Client.send_message(%{text: summary, chat_id: group.telegram_id})
   end
 
   defp summary_for_group(group) do
