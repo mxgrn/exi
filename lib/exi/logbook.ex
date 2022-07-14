@@ -2,6 +2,10 @@ defmodule Exi.Logbook do
   alias Exi.Repo
   alias Exi.Logbook.Entry
 
+  def list() do
+    Repo.all(Entry)
+  end
+
   def create_entry(attrs) do
     %Entry{}
     |> Entry.changeset(attrs)

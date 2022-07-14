@@ -54,7 +54,7 @@ config :exi, Oban,
     {Oban.Plugins.Pruner, max_age: 365 * 24 * 60 * 60},
     {Oban.Plugins.Cron,
      crontab: [
-       {"0 18 * * *", Exi.DailySummaryWorker}
+       {"0 19 * * *", Exi.DailySummaryWorker}
        # {"*/2 * * * *", Exi.DailySummaryWorker}
      ]}
   ],

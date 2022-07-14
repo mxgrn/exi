@@ -23,16 +23,21 @@ defmodule Exi.DailySummaryWorker do
 
   def send_summary_to_group(group) do
     summary = """
-    Summary for today:
+    Summary for today
     #{summary_for_group(group)}
     """
 
     Client.send_message(%{text: summary, chat_id: group.telegram_id})
   end
 
-  defp summary_for_group(group) do
-    group.users
+  def summary_for_group(group) do
+    group
+    |> Repo.preload(:users)
+    |> Map.get(:users)
     |> Enum.map(&summary_for_user(&1, group))
+    |> Enum.sort_by(fn {_username, sum} -> -sum end)
+    |> Enum.with_index()
+    |> Enum.map(&user_scoreboard_line/1)
     |> Enum.join("\n")
   end
 
@@ -45,11 +50,16 @@ defmodule Exi.DailySummaryWorker do
       from(e in Entry,
         where:
           e.group_user_id == ^group_user.id and
-            e.inserted_at < ^now and
-            e.inserted_at > ^beginning_of_day
+            e.inserted_at <= ^now and
+            e.inserted_at >= ^beginning_of_day
       )
       |> Repo.aggregate(:sum, :amount) || 0
 
-    "#{username}: #{sum}"
+    {username, sum}
+  end
+
+  defp user_scoreboard_line({{username, sum}, i}) do
+    medal = %{0 => "🥇", 1 => "🥈", 2 => "🥉"}
+    "#{medal[i] && "#{medal[i]} "}#{username}: #{sum}"
   end
 end
