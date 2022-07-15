@@ -3,10 +3,12 @@ defmodule Exi.Schemas.GroupUser do
   import Ecto.Changeset
   alias Exi.Schemas.User
   alias Exi.Schemas.Group
+  alias Exi.Logbook.Entry
 
   schema "group_users" do
     belongs_to :group, Group
     belongs_to :user, User
+    has_many :entries, Entry
 
     timestamps()
   end

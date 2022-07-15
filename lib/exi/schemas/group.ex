@@ -6,6 +6,7 @@ defmodule Exi.Schemas.Group do
   schema "groups" do
     has_many :group_users, GroupUser
     has_many :users, through: [:group_users, :user]
+    has_many :entries, through: [:group_users, :entry]
 
     field :telegram_id, :integer
 

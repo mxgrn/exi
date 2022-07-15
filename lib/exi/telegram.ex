@@ -14,7 +14,7 @@ defmodule Exi.Telegram do
   end
 
   def list_groups() do
-    from(g in Group, preload: :users)
+    from(g in Group, preload: [:users, :entries])
     |> Repo.all()
   end
 
