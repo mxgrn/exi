@@ -6,6 +6,18 @@ defmodule Exi.TelegramBot do
 
   def parse_callback!(data), do: parse_callback(data)
 
+  # bot kicked out of the group
+  defp parse_callback(%{
+         "message" => %{
+           "left_chat_member" => %{
+             "is_bot" => true
+           },
+           "chat" => group_data
+         }
+       }) do
+    Telegram.delete_group(group_data)
+  end
+
   defp parse_callback(%{
          "message" => %{
            "new_chat_member" => %{"id" => @bot_id},

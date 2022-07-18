@@ -7,6 +7,7 @@ defmodule Exi.TelegramBot.Client do
 
   def new() do
     Tesla.client([
+      Tesla.Middleware.Logger,
       {Tesla.Middleware.BaseUrl, "https://api.telegram.org/bot#{config()[:token]}"},
       Tesla.Middleware.JSON
     ])
@@ -19,12 +20,12 @@ defmodule Exi.TelegramBot.Client do
       {:ok, %{:body => %{"ok" => true}}} ->
         :ok
 
+      # kicked from the group
       {:ok, %{:body => %{"ok" => false, "description" => description, "error_code" => 403}}} ->
         {:blocked, description}
 
       {:ok,
        %{:body => %{"ok" => false, "description" => description, "error_code" => error_code}}} ->
-        Logger.error("TelegramBot.Client: #{error_code}. #{description}.")
         {:error, description}
 
       e ->

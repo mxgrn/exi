@@ -38,6 +38,11 @@ defmodule Exi.Telegram do
     do_ensure_resource(schema, %{telegram_id: id}, Map.merge(attrs, %{"telegram_id" => id}))
   end
 
+  def delete_group(%{"id" => telegram_id}) do
+    Repo.get_by(Group, telegram_id: telegram_id)
+    |> Repo.delete!()
+  end
+
   def schedule_hourly_reminders(%{id: group_id}) do
     next_hour = %{
       (DateTime.utc_now()
