@@ -50,5 +50,4 @@ defmodule ExiWeb.TelegramBotControllerTest do
       "update_id" => 859_434_146
     }
   end
-
 end

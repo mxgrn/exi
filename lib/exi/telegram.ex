@@ -1,6 +1,6 @@
 defmodule Exi.Telegram do
   @moduledoc """
-  Context for Telegram-resources such as groups and users.
+  Convert resources from Telegram data
   """
 
   alias Exi.Repo
@@ -14,6 +14,11 @@ defmodule Exi.Telegram do
 
   def get_group(%{"id" => telegram_id}) do
     Repo.get_by(Group, telegram_id: telegram_id)
+  end
+
+  def get_user(%{"id" => telegram_id}, preloads \\ []) do
+    Repo.get_by(User, telegram_id: telegram_id)
+    |> Repo.preload(preloads)
   end
 
   def ensure_user_in_group(attrs, group) do

@@ -25,6 +25,11 @@ defmodule ExiWeb.Router do
     post "/", TelegramBotController, :callback
   end
 
+  scope "/webapp", ExiWeb.WebApp do
+    pipe_through :browser
+    live "/settings", SettingsLive
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", ExiWeb do
   #   pipe_through :api

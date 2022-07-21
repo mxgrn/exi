@@ -1,0 +1,10 @@
+<h3>Your groups</h3>
+<%= for group <- @groups do %>
+  <div>
+    <%= if group.telegram_title do %>
+      <%= group.telegram_title %>
+    <% else %>
+      <i>Unknown (rename group to fix)</i>
+    <% end %>
+  </div>
+<% end %>

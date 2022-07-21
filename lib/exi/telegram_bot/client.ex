@@ -25,7 +25,7 @@ defmodule Exi.TelegramBot.Client do
         {:blocked, description}
 
       {:ok,
-       %{:body => %{"ok" => false, "description" => description, "error_code" => error_code}}} ->
+       %{:body => %{"ok" => false, "description" => description, "error_code" => _error_code}}} ->
         {:error, description}
 
       e ->
