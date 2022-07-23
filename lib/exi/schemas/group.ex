@@ -9,6 +9,7 @@ defmodule Exi.Schemas.Group do
     has_many :entries, through: [:group_users, :entries]
 
     field :telegram_id, :integer
+    field :telegram_title, :string
 
     timestamps()
   end
@@ -16,7 +17,7 @@ defmodule Exi.Schemas.Group do
   @doc false
   def changeset(group, attrs) do
     group
-    |> cast(attrs, [:telegram_id])
+    |> cast(attrs, [:telegram_id, :telegram_title])
     |> validate_required([:telegram_id])
   end
 end

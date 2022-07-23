@@ -3,9 +3,9 @@ defmodule Exi.DailySummaryWorker do
 
   alias Exi.Repo
   alias Exi.TelegramBot.Client
-  alias Exi.Telegram
   alias Exi.Schemas.GroupUser
   alias Exi.Logbook
+  alias Exi.Groups
   alias Exi.Logbook.Entry
 
   import Ecto.Query
@@ -18,7 +18,7 @@ defmodule Exi.DailySummaryWorker do
   end
 
   def send_out_group_summaries() do
-    Telegram.list_groups()
+    Groups.list()
     |> Enum.each(&send_summary_to_group/1)
   end
 

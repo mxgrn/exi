@@ -1,9 +1,12 @@
 defmodule Exi.TelegramBotTest do
   use Exi.DataCase
 
+  import Exi.Factory
+
   alias Exi.TelegramBot
   alias Exi.Repo
   alias Exi.Logbook.Entry
+  alias Exi.Groups
   alias Exi.Schemas.Group
   alias Exi.Schemas.GroupUser
   alias Exi.Schemas.User
@@ -13,6 +16,13 @@ defmodule Exi.TelegramBotTest do
       TelegramBot.parse_callback!(message())
 
       assert Repo.one(Entry)
+    end
+
+    test "creates group with Telegram title" do
+      TelegramBot.parse_callback!(message(%{group_title: "Some Group"}))
+
+      group = Repo.one(Group)
+      assert group.telegram_title == "Some Group"
     end
   end
 
@@ -53,7 +63,7 @@ defmodule Exi.TelegramBotTest do
       group = Repo.one(Group)
       assert group
 
-      TelegramBot.parse_callback!(bot_removed_message(%{chat_id: group.telegram_id}))
+      TelegramBot.parse_callback!(bot_removed(%{chat_id: group.telegram_id}))
 
       refute Repo.one(Group)
       refute Repo.one(GroupUser)
@@ -61,10 +71,28 @@ defmodule Exi.TelegramBotTest do
     end
   end
 
+  describe "renaming group" do
+    test "renames group in the DB when someone renames it in Telegram" do
+      {:ok, group} = Groups.create(group_factory(%{telegram_title: "Old name"}))
+      assert group.telegram_title == "Old name"
+
+      TelegramBot.parse_callback!(
+        group_renamed(%{telegram_id: group.telegram_id, telegram_title: "New name"})
+      )
+
+      group = Repo.get(Group, group.id)
+      assert group.telegram_title == "New name"
+    end
+  end
+
   defp message(attrs \\ %{}) do
     %{
       "message" => %{
-        "chat" => %{"id" => -1_001_712_912_115, "title" => "Exi Days", "type" => "supergroup"},
+        "chat" => %{
+          "id" => -1_001_712_912_115,
+          "title" => attrs[:group_title] || "Exi Days",
+          "type" => "supergroup"
+        },
         "date" => 1_648_282_720,
         "from" => %{
           "first_name" => "Max",
@@ -103,7 +131,7 @@ defmodule Exi.TelegramBotTest do
     }
   end
 
-  defp bot_removed_message(attrs) do
+  defp bot_removed(attrs) do
     %{
       "message" => %{
         "chat" => %{
@@ -137,6 +165,32 @@ defmodule Exi.TelegramBotTest do
         "message_id" => 67
       },
       "update_id" => 764_803_821
+    }
+  end
+
+  defp group_renamed(attrs) do
+    %{
+      "message" => %{
+        "chat" => %{
+          "all_members_are_administrators" => true,
+          "id" => attrs[:telegram_id] || -789_823_701,
+          "title" => "Exi Dev",
+          "type" => "group"
+        },
+        "date" => 1_658_409_693,
+        "from" => %{
+          "first_name" => "Max",
+          "id" => 2_144_377,
+          "is_bot" => false,
+          "is_premium" => true,
+          "language_code" => "en",
+          "last_name" => "Grin",
+          "username" => "mxgrn"
+        },
+        "message_id" => 77,
+        "new_chat_title" => attrs[:telegram_title] || "Some New Group Name"
+      },
+      "update_id" => 764_803_832
     }
   end
 

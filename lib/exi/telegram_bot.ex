@@ -1,6 +1,7 @@
 defmodule Exi.TelegramBot do
   alias Exi.Telegram
   alias Exi.Logbook
+  alias Exi.Groups
 
   @bot_id 5_222_232_628
 
@@ -59,6 +60,15 @@ defmodule Exi.TelegramBot do
     edit_entry(text, user_data, group_data, message_id)
   end
 
+  defp parse_callback(%{
+         "message" => %{
+           "chat" => group_data,
+           "new_chat_title" => new_group_name
+         }
+       }) do
+    rename_group(group_data, new_group_name)
+  end
+
   defp parse_callback(data) do
     IO.puts(~s(\nUnknown data: #{inspect(data)}\n))
   end
@@ -114,5 +124,11 @@ defmodule Exi.TelegramBot do
       group_user_id: group_user.id,
       telegram_message_id: message_id
     })
+  end
+
+  defp rename_group(group_data, new_group_name) do
+    group = Telegram.get_group(group_data)
+
+    Groups.update(group, %{telegram_title: new_group_name})
   end
 end

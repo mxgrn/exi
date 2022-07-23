@@ -7,19 +7,13 @@ defmodule Exi.Telegram do
   alias Exi.Schemas.Group
   alias Exi.Schemas.User
   alias Exi.Schemas.GroupUser
-  import Ecto.Query
 
-  def get_group(id) do
-    Repo.get(Group, id)
+  def ensure_group(params) do
+    ensure_resource(Group, params)
   end
 
-  def list_groups() do
-    from(g in Group, preload: [:users, :entries])
-    |> Repo.all()
-  end
-
-  def ensure_group(attrs) do
-    ensure_resource(Group, attrs)
+  def get_group(%{"id" => telegram_id}) do
+    Repo.get_by(Group, telegram_id: telegram_id)
   end
 
   def ensure_user_in_group(attrs, group) do
@@ -34,8 +28,16 @@ defmodule Exi.Telegram do
     do_ensure_resource(GroupUser, %{user_id: user_id, group_id: group_id}, attrs)
   end
 
-  def ensure_resource(schema, %{"id" => id} = attrs) do
-    do_ensure_resource(schema, %{telegram_id: id}, Map.merge(attrs, %{"telegram_id" => id}))
+  def ensure_resource(Group, %{"id" => id, "title" => title} = params) do
+    do_ensure_resource(
+      Group,
+      %{telegram_id: id},
+      Map.merge(params, %{"telegram_id" => id, "telegram_title" => title})
+    )
+  end
+
+  def ensure_resource(schema, %{"id" => id} = params) do
+    do_ensure_resource(schema, %{telegram_id: id}, Map.merge(params, %{"telegram_id" => id}))
   end
 
   def delete_group(%{"id" => telegram_id}) do
@@ -57,29 +59,28 @@ defmodule Exi.Telegram do
     |> Oban.insert()
   end
 
-  defp do_ensure_resource(schema, get_by, attrs) do
+  defp do_ensure_resource(schema, get_by, params) do
     schema
     |> Repo.get_by(get_by)
     |> case do
       nil ->
-        create_resource(schema, attrs)
+        create_resource(schema, params)
 
       record ->
         record
     end
   end
 
-  defp create_resource(Group, attrs) do
-    _group = do_create_resource(Group, attrs)
-    # schedule_hourly_reminders(group)
+  defp create_resource(Group, params) do
+    do_create_resource(Group, params)
   end
 
-  defp create_resource(schema, attrs) do
-    do_create_resource(schema, attrs)
+  defp create_resource(schema, params) do
+    do_create_resource(schema, params)
   end
 
-  defp do_create_resource(schema, attrs) do
-    schema.changeset(struct(schema, %{}), attrs)
+  defp do_create_resource(schema, params) do
+    schema.changeset(struct(schema, %{}), params)
     |> Repo.insert!()
   end
 end
