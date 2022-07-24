@@ -4,7 +4,7 @@ defmodule ExiWeb.WebApp.SettingsLive do
   alias Exi.Telegram
 
   def mount(_params, _session, socket) do
-    with %{"tg_init_data" => data} <- get_connect_params(socket),
+    with %{"tg_init_data" => %{} = data} <- get_connect_params(socket),
          {:ok, %{"user" => user}} <-
            validate_web_app_init_data(data, Application.get_env(:exi, :telegram_bot)[:token]),
          {:ok, user} <- JSON.decode(user) do
