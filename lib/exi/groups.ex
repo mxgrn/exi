@@ -6,8 +6,9 @@ defmodule Exi.Groups do
   alias Exi.Schemas.GroupUser
   alias Exi.Repo
 
-  def get(id) do
+  def get(id, preloads \\ []) do
     Repo.get(Group, id)
+    |> Repo.preload(preloads)
   end
 
   def list() do

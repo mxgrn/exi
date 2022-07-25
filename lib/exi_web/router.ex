@@ -27,7 +27,7 @@ defmodule ExiWeb.Router do
 
   scope "/webapp", ExiWeb.WebApp do
     pipe_through :browser
-    live "/settings", SettingsLive
+    live "/settings", SettingsLive, :index
   end
 
   # Other scopes may use custom stacks.

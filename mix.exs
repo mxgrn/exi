@@ -53,7 +53,7 @@ defmodule Exi.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:oban, "~> 2.11"},
       {:json, "~> 1.4"},
-    {:tailwind, "~> 0.1.8", runtime: Mix.env() == :dev}
+      {:tailwind, "~> 0.1.8", runtime: Mix.env() == :dev}
     ]
   end
 
