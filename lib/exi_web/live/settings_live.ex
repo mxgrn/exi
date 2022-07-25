@@ -91,7 +91,7 @@ defmodule ExiWeb.WebApp.SettingsLive do
     {received_hash, decoded_map} =
       tg_init_data
       |> URI.decode_query()
-      |> Map.pop!("hash")
+      |> Map.pop("hash")
 
     data_check_string =
       decoded_map
