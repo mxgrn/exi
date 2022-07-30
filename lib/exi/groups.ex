@@ -28,6 +28,10 @@ defmodule Exi.Groups do
     |> Repo.update()
   end
 
+  def change(group, attrs \\ %{}) do
+    Group.changeset(group, attrs)
+  end
+
   def link_to_user(%Group{id: group_id}, %User{id: user_id}) do
     %GroupUser{}
     |> GroupUser.changeset(%{group_id: group_id, user_id: user_id})

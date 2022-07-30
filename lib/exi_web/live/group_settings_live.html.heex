@@ -25,16 +25,21 @@
   </div>
 </div>
 
-<.form let={f} for={:foo} phx-submit="save" class="bg-white rounded-md mx-4">
+<.form let={f} for={@changeset} phx-change="save" class="bg-white rounded-md mx-4">
   <div class="pl-4-safe flex items-center">
     <div class="pr-4-safe w-full relative py-2.5">
-      <div class="text-xs duration-200">Send daily summary at</div>
+      <div class="text-xs text-zinc-600 duration-200">
+        Time of daily summary, Greenwich time
+      </div>
       <div class="relative -mb-2.5">
-        <%= time_input(f, :daily_reporting_at,
+        <%= time_input(f, :day_end_time,
           type: "time",
           class:
             "block text-base appearance-none w-full focus:outline-none bg-transparent h-11 placeholder-black placeholder-opacity-30 dark:placeholder-white dark:placeholder-opacity-30"
         ) %>
+      </div>
+      <div class="pr-4-safe mb-1 flex items-center text-zinc-400 text-xs">
+        Greenwich time now: <%= truncate_to_minutes(Time.utc_now()) %>
       </div>
     </div>
   </div>
@@ -44,10 +49,10 @@
   USERS
 </div>
 
-<ul class="space-y-1 bg-white rounded-md mx-4">
+<ul class="space-y-1 bg-white rounded-md mx-4 last-child-hairline-b-none">
   <%= for user <- @group.users do %>
     <li>
-      <a class="pl-4-safe flex items-center  duration-300 active:duration-0 cursor-pointer select-none active:hairline-transparent active:bg-black active:bg-opacity-10 dark:active:bg-white dark:active:bg-opacity-10">
+      <a class="pl-4-safe flex items-center  duration-300 active:duration-0 select-none active:hairline-transparent active:bg-black active:bg-opacity-10 dark:active:bg-white dark:active:bg-opacity-10">
         <div class="pr-4-safe w-full relative hairline-b py-2.5">
           <div class="flex justify-between items-center  text-list-title-ios">
             <div class="shrink">

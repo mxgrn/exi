@@ -11,13 +11,15 @@ defmodule Exi.Schemas.Group do
     field :telegram_id, :integer
     field :telegram_title, :string
 
+    field :day_end_time, :time, default: ~T[00:00:00]
+
     timestamps()
   end
 
   @doc false
   def changeset(group, attrs) do
     group
-    |> cast(attrs, [:telegram_id, :telegram_title])
+    |> cast(attrs, [:telegram_id, :telegram_title, :day_end_time])
     |> validate_required([:telegram_id])
   end
 end
