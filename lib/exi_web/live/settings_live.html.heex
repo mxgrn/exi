@@ -1,0 +1,54 @@
+<%= if assigns[:user] do %>
+  <div>
+    <div class="w-full z-20 top-0 pt-safe sticky text-navbar-ios">
+      <div class="absolute w-full h-full left-0 top-0 bg-bars-ios-light dark:bg-bars-ios-dark hairline-b translucent">
+      </div>
+      <div class="flex relative items-center w-full overflow-hidden pl-2-safe pr-2-safe h-11 justify-between">
+        <div class="text-black dark:text-white whitespace-nowrap leading-tight font-semibold absolute top-1/2 left-1/2 transform-gpu -translate-x-1/2 -translate-y-1/2 text-center">
+          Settings
+        </div>
+      </div>
+    </div>
+    <div class="ml-4 pl-4-safe pr-4-safe mt-4 mb-1 flex items-center text-opacity-55 text-black text-xs">
+      YOUR GROUPS
+    </div>
+    <ul class="last-child-hairline-b-none mx-4 bg-white rounded-md">
+      <%= for group <- @groups do %>
+        <li>
+          <%= live_redirect to: Routes.group_settings_path(@socket, :show, group), class: "pl-4-safe flex items-center  duration-300 active:duration-0 cursor-pointer select-none active:hairline-transparent active:bg-black active:bg-opacity-10 dark:active:bg-white dark:active:bg-opacity-10"  do %>
+            <div class="pr-4-safe w-full relative hairline-b py-2.5">
+              <div class="flex justify-between items-center  text-list-title-ios">
+                <div class="shrink">
+                  <%= if group.telegram_title do %>
+                    <%= group.telegram_title %>
+                  <% else %>
+                    <i>Unknown (rename group to fix)</i>
+                  <% end %>
+                </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="8"
+                  height="14"
+                  viewBox="0 0 12 20"
+                  fill="currentcolor"
+                  class="opacity-20 shrink-0 ml-3"
+                >
+                  <path d="M11.518406,10.5648622 C11.4831857,10.6163453 11.4426714,10.6653692 11.3968592,10.7111814 L2.5584348,19.5496058 C1.9753444,20.1326962 1.03186648,20.1345946 0.44199608,19.5447242 C-0.14379032,18.9589377 -0.14922592,18.0146258 0.43711448,17.4282854 L7.87507783,9.9903221 L0.4431923,2.5584366 C-0.1398981,1.9753462 -0.1417965,1.0318683 0.448074,0.4419979 C1.0338604,-0.1437886 1.9781723,-0.1492241 2.56451268,0.4371163 L11.4029371,9.2755407 C11.7556117,9.6282153 11.7969345,10.1725307 11.518406,10.5648622 Z">
+                  </path>
+                </svg>
+              </div>
+            </div>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <%= if Application.get_env(:exi, :dev) do %>
+    <div class="text-xs text-center text-zinc-400 mt-4">
+      <a href={"/webapp/home?" <> @query_string} target="_blank">debug link</a>
+    </div>
+  <% end %>
+<% else %>
+  <%= assigns |> inspect(limit: :infinity) %>
+<% end %>

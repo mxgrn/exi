@@ -8,6 +8,7 @@ defmodule ExiWeb.Router do
     plug :put_root_layout, {ExiWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug ExiWeb.TelegramAuthPlug
   end
 
   pipeline :api do
@@ -27,7 +28,12 @@ defmodule ExiWeb.Router do
 
   scope "/webapp", ExiWeb.WebApp do
     pipe_through :browser
-    live "/settings", SettingsLive, :index
+
+    live_session :default, on_mount: ExiWeb.InitAssigns do
+      live "/home", SettingsLive, :index
+      live "/settings", SettingsLive, :index
+      live "/groups/:id", GroupSettingsLive, :show
+    end
   end
 
   # Other scopes may use custom stacks.

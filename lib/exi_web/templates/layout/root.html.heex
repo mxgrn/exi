@@ -14,10 +14,16 @@
       type="text/javascript"
       src={Routes.static_path(@conn, "/assets/app.js")}
     />
-
-    <script src="https://telegram.org/js/telegram-web-app.js" />
+    <link
+      rel="stylesheet"
+      href="https://konstaui.com/kitchen-sink/react/dist/assets/index.66871f65.css"
+      type="text/css"
+      media="screen"
+      title="no title"
+      charset="utf-8"
+    />
   </head>
-  <body class="p-4">
+  <body class="bg-zinc-100">
     <%= @inner_content %>
   </body>
 </html>
