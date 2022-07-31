@@ -1,7 +1,7 @@
 defmodule Exi.EntryReminder do
   use Oban.Worker, queue: :events
 
-  alias Exi.TelegramBot.Client
+  alias Exi.Telegram.Api.Client
   alias Exi.Telegram
   alias Exi.Groups
 

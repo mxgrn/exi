@@ -1,9 +1,9 @@
-defmodule Exi.TelegramBotTest do
+defmodule Exi.Telegram.ParserTest do
   use Exi.DataCase
 
   import Exi.Factory
 
-  alias Exi.TelegramBot
+  alias Exi.Telegram.Parser
   alias Exi.Repo
   alias Exi.Entries.Entry
   alias Exi.Groups
@@ -13,13 +13,13 @@ defmodule Exi.TelegramBotTest do
 
   describe "creating message" do
     test "stores entry when message is valid entry" do
-      TelegramBot.parse_callback!(message())
+      Parser.parse(message())
 
       assert Repo.one(Entry)
     end
 
     test "creates group with Telegram title" do
-      TelegramBot.parse_callback!(message(%{group_title: "Some Group"}))
+      Parser.parse(message(%{group_title: "Some Group"}))
 
       group = Repo.one(Group)
       assert group.telegram_title == "Some Group"
@@ -28,33 +28,33 @@ defmodule Exi.TelegramBotTest do
 
   describe "editing message" do
     test "changes entry value if entry already existed" do
-      %{value: 1, message_id: 1} |> message() |> TelegramBot.parse_callback!()
+      %{value: 1, message_id: 1} |> message() |> Parser.parse()
       entry = Repo.one(Entry)
       assert entry.amount == 1
 
-      %{value: 2, message_id: 1} |> edited_message() |> TelegramBot.parse_callback!()
+      %{value: 2, message_id: 1} |> edited_message() |> Parser.parse()
       entry = reload(entry)
       assert entry.amount == 2
     end
 
     test "creates entry when random text was replaced with a value" do
-      %{value: 1, message_id: 1} |> edited_message() |> TelegramBot.parse_callback!()
+      %{value: 1, message_id: 1} |> edited_message() |> Parser.parse()
       entry = Repo.one(Entry)
       assert entry.amount == 1
     end
 
     test "deletes entry when existing entry was replaced with random text" do
-      %{value: 1, message_id: 1} |> message() |> TelegramBot.parse_callback!()
+      %{value: 1, message_id: 1} |> message() |> Parser.parse()
       assert Repo.one(Entry)
 
-      %{value: "Hello group!", message_id: 1} |> edited_message() |> TelegramBot.parse_callback!()
+      %{value: "Hello group!", message_id: 1} |> edited_message() |> Parser.parse()
       refute Repo.one(Entry)
     end
   end
 
   describe "adding bot to Telegram group" do
     test "creates group in DB" do
-      %{telegram_title: "Some group"} |> my_chat_member() |> TelegramBot.parse_callback!()
+      %{telegram_title: "Some group"} |> my_chat_member() |> Parser.parse()
 
       group = Repo.one(Group)
       assert group.telegram_title == "Some group"
@@ -64,7 +64,7 @@ defmodule Exi.TelegramBotTest do
   describe "kicking bot out of group" do
     test "deletes the group and all its associated resources" do
       # create all resources, including a group
-      TelegramBot.parse_callback!(message())
+      Parser.parse(message())
       assert Repo.one(User)
       assert Repo.one(GroupUser)
       assert Repo.one(Entry)
@@ -72,7 +72,7 @@ defmodule Exi.TelegramBotTest do
       group = Repo.one(Group)
       assert group
 
-      TelegramBot.parse_callback!(bot_removed(%{chat_id: group.telegram_id}))
+      Parser.parse(bot_removed(%{chat_id: group.telegram_id}))
 
       refute Repo.one(Group)
       refute Repo.one(GroupUser)
@@ -85,9 +85,7 @@ defmodule Exi.TelegramBotTest do
       {:ok, group} = Groups.create(group_factory(%{telegram_title: "Old name"}))
       assert group.telegram_title == "Old name"
 
-      TelegramBot.parse_callback!(
-        group_renamed(%{telegram_id: group.telegram_id, telegram_title: "New name"})
-      )
+      Parser.parse(group_renamed(%{telegram_id: group.telegram_id, telegram_title: "New name"}))
 
       group = Repo.get(Group, group.id)
       assert group.telegram_title == "New name"

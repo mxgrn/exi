@@ -1,4 +1,4 @@
-defmodule Exi.TelegramBot.Client do
+defmodule Exi.Telegram.Api.Client do
   require Logger
 
   def config do

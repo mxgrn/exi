@@ -2,7 +2,7 @@ defmodule Exi.DailySummaryWorker do
   use Oban.Worker, queue: :events
 
   alias Exi.Repo
-  alias Exi.TelegramBot.Client
+  alias Exi.Telegram.Api.Client
   alias Exi.Groups.GroupUser
   alias Exi.Logbook
   alias Exi.Groups
