@@ -1,13 +1,15 @@
 defmodule Exi.TelegramBot do
   alias Exi.Telegram
-  alias Exi.Logbook
-  alias Exi.Groups
 
-  @bot_id 5_222_232_628
+  @bot_id Application.get_env(:exi, :telegram)[:bot_id] ||
+            raise("Please, configure Telegram bot ID")
 
-  def parse_callback!(data), do: parse_callback(data)
+  def parse_callback!(data) do
+    parse_callback(data)
+    :ok
+  end
 
-  # bot kicked out of the group
+  # bot gets kicked out of a group
   defp parse_callback(%{
          "message" => %{
            "left_chat_member" => %{
@@ -19,25 +21,17 @@ defmodule Exi.TelegramBot do
     Telegram.delete_group(group_data)
   end
 
+  # bot gets added to a group
   defp parse_callback(%{
-         "message" => %{
-           "new_chat_member" => %{"id" => @bot_id},
+         "my_chat_member" => %{
+           "new_chat_member" => %{"user" => %{"id" => @bot_id, "is_bot" => true}},
            "chat" => group_data
          }
        }) do
     Telegram.ensure_group(group_data)
   end
 
-  defp parse_callback(%{
-         "message" => %{
-           "new_chat_member" => user_data,
-           "chat" => group_data
-         }
-       }) do
-    group = Telegram.ensure_group(group_data)
-    Telegram.ensure_user_in_group(user_data, group)
-  end
-
+  # regular message, maybe an entry
   defp parse_callback(%{
          "message" => %{
            "chat" => group_data,
@@ -46,9 +40,10 @@ defmodule Exi.TelegramBot do
            "message_id" => message_id
          }
        }) do
-    log_entry(text, user_data, group_data, message_id)
+    Telegram.log_entry(text, user_data, group_data, message_id)
   end
 
+  # user edits a message
   defp parse_callback(%{
          "edited_message" => %{
            "chat" => group_data,
@@ -57,78 +52,21 @@ defmodule Exi.TelegramBot do
            "message_id" => message_id
          }
        }) do
-    edit_entry(text, user_data, group_data, message_id)
+    Telegram.edit_entry(text, user_data, group_data, message_id)
   end
 
+  # group gets renamed by admin
   defp parse_callback(%{
          "message" => %{
            "chat" => group_data,
            "new_chat_title" => new_group_name
          }
        }) do
-    rename_group(group_data, new_group_name)
+    Telegram.rename_group(group_data, new_group_name)
   end
 
+  # follback
   defp parse_callback(data) do
     IO.puts(~s(\nUnknown data: #{inspect(data)}\n))
-  end
-
-  def log_entry(text, user_data, group_data, message_id) do
-    parse_entry(text)
-    |> case do
-      {:ok, amount} ->
-        create_entry(amount, user_data, group_data, message_id)
-
-      _ ->
-        nil
-    end
-  end
-
-  def edit_entry(text, user_data, group_data, message_id) do
-    # group = Telegram.ensure_group(group_data)
-    Logbook.get_by(%{telegram_message_id: message_id}, group_user: [:group, :user])
-    |> case do
-      nil ->
-        parse_entry(text)
-        |> case do
-          {:ok, amount} ->
-            # create entry, possibly for the first time
-            create_entry(amount, user_data, group_data, message_id)
-
-          _ ->
-            nil
-        end
-
-      entry ->
-        parse_entry(text)
-        |> case do
-          {:ok, amount} ->
-            Logbook.update_entry(entry, %{amount: amount})
-
-          _ ->
-            Logbook.delete_entry!(entry)
-        end
-    end
-  end
-
-  defp parse_entry(text) do
-    Logbook.parse_amount(text)
-  end
-
-  defp create_entry(amount, user_data, group_data, message_id) do
-    group = Telegram.ensure_group(group_data)
-    %{group_user: group_user} = Telegram.ensure_user_in_group(user_data, group)
-
-    Logbook.create_entry(%{
-      amount: amount,
-      group_user_id: group_user.id,
-      telegram_message_id: message_id
-    })
-  end
-
-  defp rename_group(group_data, new_group_name) do
-    group = Telegram.get_group(group_data)
-
-    Groups.update(group, %{telegram_title: new_group_name})
   end
 end

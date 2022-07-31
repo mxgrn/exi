@@ -31,3 +31,5 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Disable Oban
 config :exi, Oban, queues: false, plugins: false
+
+config :exi, :telegram, bot_id: 5_488_043_084

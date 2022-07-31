@@ -7,6 +7,69 @@ defmodule Exi.Telegram do
   alias Exi.Schemas.Group
   alias Exi.Schemas.User
   alias Exi.Schemas.GroupUser
+  alias Exi.Logbook
+  alias Exi.Groups
+
+  require Logger
+
+  def log_entry(text, user_data, group_data, message_id) do
+    parse_entry(text)
+    |> case do
+      {:ok, amount} ->
+        create_entry(amount, user_data, group_data, message_id)
+
+      _ ->
+        nil
+    end
+  end
+
+  def edit_entry(text, user_data, group_data, message_id) do
+    # group = Telegram.ensure_group(group_data)
+    Logbook.get_by(%{telegram_message_id: message_id}, group_user: [:group, :user])
+    |> case do
+      nil ->
+        parse_entry(text)
+        |> case do
+          {:ok, amount} ->
+            # create entry, possibly for the first time
+            create_entry(amount, user_data, group_data, message_id)
+
+          _ ->
+            nil
+        end
+
+      entry ->
+        parse_entry(text)
+        |> case do
+          {:ok, amount} ->
+            Logbook.update_entry(entry, %{amount: amount})
+
+          _ ->
+            Logbook.delete_entry!(entry)
+        end
+    end
+  end
+
+  def parse_entry(text) do
+    Logbook.parse_amount(text)
+  end
+
+  def create_entry(amount, user_data, group_data, message_id) do
+    group = ensure_group(group_data)
+    %{group_user: group_user} = ensure_user_in_group(user_data, group)
+
+    Logbook.create_entry(%{
+      amount: amount,
+      group_user_id: group_user.id,
+      telegram_message_id: message_id
+    })
+  end
+
+  def rename_group(group_data, new_group_name) do
+    group = get_group(group_data)
+
+    Groups.update(group, %{telegram_title: new_group_name})
+  end
 
   def ensure_group(params) do
     ensure_resource(Group, params)
@@ -47,7 +110,14 @@ defmodule Exi.Telegram do
 
   def delete_group(%{"id" => telegram_id}) do
     Repo.get_by(Group, telegram_id: telegram_id)
-    |> Repo.delete!()
+    |> case do
+      nil ->
+        Logger.warn("Could not delete group with telegram_id #{telegram_id}: group not found")
+        :ok
+
+      group ->
+        Repo.delete!(group)
+    end
   end
 
   def schedule_hourly_reminders(%{id: group_id}) do

@@ -52,6 +52,15 @@ defmodule Exi.TelegramBotTest do
     end
   end
 
+  describe "adding bot to Telegram group" do
+    test "creates group in DB" do
+      %{telegram_title: "Some group"} |> my_chat_member() |> TelegramBot.parse_callback!()
+
+      group = Repo.one(Group)
+      assert group.telegram_title == "Some group"
+    end
+  end
+
   describe "kicking bot out of group" do
     test "deletes the group and all its associated resources" do
       # create all resources, including a group
@@ -85,6 +94,7 @@ defmodule Exi.TelegramBotTest do
     end
   end
 
+  # regular message
   defp message(attrs \\ %{}) do
     %{
       "message" => %{
@@ -109,6 +119,7 @@ defmodule Exi.TelegramBotTest do
     }
   end
 
+  # someone edits a message
   defp edited_message(attrs) do
     %{
       "edited_message" => %{
@@ -131,6 +142,7 @@ defmodule Exi.TelegramBotTest do
     }
   end
 
+  # bot gets kicked out of a group
   defp bot_removed(attrs) do
     %{
       "message" => %{
@@ -168,6 +180,7 @@ defmodule Exi.TelegramBotTest do
     }
   end
 
+  # groups gets renamed by admin
   defp group_renamed(attrs) do
     %{
       "message" => %{
@@ -191,6 +204,49 @@ defmodule Exi.TelegramBotTest do
         "new_chat_title" => attrs[:telegram_title] || "Some New Group Name"
       },
       "update_id" => 764_803_832
+    }
+  end
+
+  # bot gets added to a group
+  defp my_chat_member(attrs) do
+    %{
+      "my_chat_member" => %{
+        "chat" => %{
+          "all_members_are_administrators" => true,
+          "id" => -688_998_308,
+          "title" => attrs[:telegram_title] || "Some group",
+          "type" => "group"
+        },
+        "date" => 1_659_272_681,
+        "from" => %{
+          "first_name" => "Max",
+          "id" => 2_144_377,
+          "is_bot" => false,
+          "is_premium" => true,
+          "language_code" => "en",
+          "last_name" => "Grin",
+          "username" => "mxgrn"
+        },
+        "new_chat_member" => %{
+          "status" => "member",
+          "user" => %{
+            "first_name" => "Exi Dev Bot",
+            "id" => 5_488_043_084,
+            "is_bot" => true,
+            "username" => "exi_dev_bot"
+          }
+        },
+        "old_chat_member" => %{
+          "status" => "left",
+          "user" => %{
+            "first_name" => "Exi Dev Bot",
+            "id" => 5_488_043_084,
+            "is_bot" => true,
+            "username" => "exi_dev_bot"
+          }
+        }
+      },
+      "update_id" => 764_803_854
     }
   end
 

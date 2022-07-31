@@ -16,6 +16,8 @@ config :exi, ExiWeb.Endpoint,
 # Do not print debug messages in production
 config :logger, level: :info
 
+config :exi, :telegram, bot_id: 5_222_232_628
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key

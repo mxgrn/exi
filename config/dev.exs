@@ -64,6 +64,8 @@ config :exi, ExiWeb.Endpoint,
     ]
   ]
 
+config :exi, :telegram, bot_id: 5_488_043_084
+
 config :exi, :dev, true
 
 # Do not include metadata nor timestamps in development logs
