@@ -1,7 +1,7 @@
-defmodule Exi.Schemas.User do
+defmodule Exi.Users.User do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Exi.Schemas.GroupUser
+  alias Exi.Groups.GroupUser
 
   schema "users" do
     has_many :group_users, GroupUser

@@ -5,11 +5,11 @@ defmodule Exi.TelegramBotTest do
 
   alias Exi.TelegramBot
   alias Exi.Repo
-  alias Exi.Logbook.Entry
+  alias Exi.Entries.Entry
   alias Exi.Groups
-  alias Exi.Schemas.Group
-  alias Exi.Schemas.GroupUser
-  alias Exi.Schemas.User
+  alias Exi.Groups.Group
+  alias Exi.Groups.GroupUser
+  alias Exi.Users.User
 
   describe "creating message" do
     test "stores entry when message is valid entry" do

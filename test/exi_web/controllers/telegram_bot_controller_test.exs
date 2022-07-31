@@ -2,10 +2,10 @@ defmodule ExiWeb.TelegramBotControllerTest do
   use ExiWeb.ConnCase
 
   alias Exi.Repo
-  alias Exi.Logbook.Entry
-  alias Exi.Schemas.Group
-  alias Exi.Schemas.GroupUser
-  alias Exi.Schemas.User
+  alias Exi.Entries.Entry
+  alias Exi.Groups.Group
+  alias Exi.Groups.GroupUser
+  alias Exi.Users.User
 
   describe "logging" do
     test "creates group, user in group, and entry", %{conn: conn} do

@@ -1,12 +1,13 @@
 defmodule Exi.Telegram do
   @moduledoc """
-  Convert resources from Telegram data
+  Works with Telegram data
+  TODO: move more generic methods out to generic contexts
   """
 
   alias Exi.Repo
-  alias Exi.Schemas.Group
-  alias Exi.Schemas.User
-  alias Exi.Schemas.GroupUser
+  alias Exi.Groups.Group
+  alias Exi.Users.User
+  alias Exi.Groups.GroupUser
   alias Exi.Logbook
   alias Exi.Groups
 
@@ -24,7 +25,6 @@ defmodule Exi.Telegram do
   end
 
   def edit_entry(text, user_data, group_data, message_id) do
-    # group = Telegram.ensure_group(group_data)
     Logbook.get_by(%{telegram_message_id: message_id}, group_user: [:group, :user])
     |> case do
       nil ->

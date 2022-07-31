@@ -1,6 +1,6 @@
 defmodule Exi.Logbook do
   alias Exi.Repo
-  alias Exi.Logbook.Entry
+  alias Exi.Entries.Entry
 
   import Ecto.Query
 

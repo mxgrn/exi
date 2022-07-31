@@ -1,9 +1,9 @@
-defmodule Exi.Schemas.GroupUser do
+defmodule Exi.Groups.GroupUser do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Exi.Schemas.User
-  alias Exi.Schemas.Group
-  alias Exi.Logbook.Entry
+  alias Exi.Users.User
+  alias Exi.Groups.Group
+  alias Exi.Entries.Entry
 
   schema "group_users" do
     belongs_to :group, Group

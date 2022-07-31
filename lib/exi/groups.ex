@@ -1,9 +1,9 @@
 defmodule Exi.Groups do
   import Ecto.Query
 
-  alias Exi.Schemas.Group
-  alias Exi.Schemas.User
-  alias Exi.Schemas.GroupUser
+  alias Exi.Groups.Group
+  alias Exi.Users.User
+  alias Exi.Groups.GroupUser
   alias Exi.Repo
 
   def get(id, preloads \\ []) do

@@ -1,5 +1,5 @@
 defmodule Exi.Users do
-  alias Exi.Schemas.User
+  alias Exi.Users.User
   alias Exi.Repo
 
   def create(attrs \\ %{}) do

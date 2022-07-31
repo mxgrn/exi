@@ -3,10 +3,10 @@ defmodule Exi.DailySummaryWorker do
 
   alias Exi.Repo
   alias Exi.TelegramBot.Client
-  alias Exi.Schemas.GroupUser
+  alias Exi.Groups.GroupUser
   alias Exi.Logbook
   alias Exi.Groups
-  alias Exi.Logbook.Entry
+  alias Exi.Entries.Entry
 
   import Ecto.Query
 

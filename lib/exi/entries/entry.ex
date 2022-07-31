@@ -1,7 +1,7 @@
-defmodule Exi.Logbook.Entry do
+defmodule Exi.Entries.Entry do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Exi.Schemas.GroupUser
+  alias Exi.Groups.GroupUser
 
   schema "entries" do
     belongs_to :group_user, GroupUser
