@@ -48,6 +48,7 @@ defmodule Exi.DailySummaryWorker do
     |> Repo.preload(:users)
     |> Map.get(:users)
     |> Enum.map(&summary_for_user(&1, group))
+    |> Enum.reject(fn {_username, sum} -> sum == 0 end)
     |> Enum.sort_by(fn {_username, sum} -> -sum end)
     |> Enum.with_index()
     |> Enum.map(&user_scoreboard_line/1)
