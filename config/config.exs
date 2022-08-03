@@ -51,12 +51,7 @@ config :exi, Oban,
   repo: Exi.Repo,
   plugins: [
     # keep jobs for 1 year
-    {Oban.Plugins.Pruner, max_age: 365 * 24 * 60 * 60},
-    {Oban.Plugins.Cron,
-     crontab: [
-       {"0 19 * * *", Exi.DailySummaryWorker}
-       # {"*/2 * * * *", Exi.DailySummaryWorker}
-     ]}
+    {Oban.Plugins.Pruner, max_age: 365 * 24 * 60 * 60}
   ],
   queues: [default: 10, events: 50, media: 20]
 

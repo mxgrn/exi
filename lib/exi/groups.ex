@@ -37,4 +37,26 @@ defmodule Exi.Groups do
     |> GroupUser.changeset(%{group_id: group_id, user_id: user_id})
     |> Repo.insert()
   end
+
+  def last_daily_report_at(%Group{day_end_time: day_end_time}) do
+    result = Map.merge(DateTime.utc_now(), Map.from_struct(day_end_time))
+
+    if DateTime.diff(result, DateTime.utc_now()) >= -5 do
+      # time appears in the future or "about now", subtract 24h
+      DateTime.add(result, -60 * 60 * 24, :second)
+    else
+      result
+    end
+  end
+
+  def next_daily_report_at(%Group{day_end_time: day_end_time}) do
+    result = Map.merge(DateTime.utc_now(), Map.from_struct(day_end_time))
+
+    if DateTime.diff(result, DateTime.utc_now()) <= 5 do
+      # time appears in the past or "about now", add 24h
+      DateTime.add(result, 60 * 60 * 24, :second)
+    else
+      result
+    end
+  end
 end

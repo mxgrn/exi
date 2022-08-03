@@ -1,6 +1,7 @@
 defmodule Exi.Logbook do
   alias Exi.Repo
   alias Exi.Entries.Entry
+  alias Exi.Groups
 
   import Ecto.Query
 
@@ -42,13 +43,12 @@ defmodule Exi.Logbook do
     end
   end
 
-  # TODO implement taking period into account
   def entry_number_in_group(%{id: group_id}, _period \\ :day) do
-    start_moment = DateTimeUtil.beginning_of_day()
+    group = Groups.get(group_id)
 
     from(e in Entry,
       join: gu in assoc(e, :group_user),
-      where: gu.group_id == ^group_id and e.inserted_at > ^start_moment
+      where: gu.group_id == ^group_id and e.inserted_at > ^Groups.last_daily_report_at(group)
     )
     |> Repo.aggregate(:count, :id)
   end

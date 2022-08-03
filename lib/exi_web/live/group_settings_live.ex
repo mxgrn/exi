@@ -4,6 +4,8 @@ defmodule ExiWeb.WebApp.GroupSettingsLive do
   alias Exi.Groups
   alias Exi.DailySummaryWorker
 
+  @update_delay 1000
+
   def mount(%{"id" => id}, _session, socket) do
     user = Telegram.get_user(socket.assigns.telegram_user, [:groups])
     group = Groups.get(id, [:users])
@@ -14,25 +16,28 @@ defmodule ExiWeb.WebApp.GroupSettingsLive do
   end
 
   def handle_event("save", %{"group" => params}, socket) do
-    update(socket, params)
+    if socket.assigns[:update_timer] do
+      Process.cancel_timer(socket.assigns.update_timer)
+    end
+
+    timer = Process.send_after(self(), {:update, params}, @update_delay)
+
+    {:noreply, assign(socket, update_timer: timer)}
   end
 
-  def truncate_to_minutes(time) do
-    [hours, mins | _] = time |> to_string() |> String.split(":")
-    Enum.join([hours, mins], ":")
-  end
-
-  defp update(socket, params) do
+  def handle_info({:update, params}, socket) do
     case Groups.update(socket.assigns.group, params) do
       {:ok, group} ->
-        %{group_id: group.id}
-        |> DailySummaryWorker.new(scheduled_at: group.day_end_time, replace: [:scheduled_at])
-        |> Oban.insert!()
-
+        DailySummaryWorker.reschedule_for_group(group)
         {:noreply, socket}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
     end
+  end
+
+  def truncate_to_minutes(time) do
+    [hours, mins | _] = time |> to_string() |> String.split(":")
+    Enum.join([hours, mins], ":")
   end
 end

@@ -1,5 +1,6 @@
 defmodule Exi.DailySummaryWorker do
-  use Oban.Worker, queue: :events
+  use Oban.Worker,
+    unique: [period: 60 * 60 * 24 * 365, states: [:scheduled]]
 
   alias Exi.Repo
   alias Exi.Telegram.Api.Client
@@ -11,15 +12,29 @@ defmodule Exi.DailySummaryWorker do
   import Ecto.Query
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: _args}) do
-    send_out_group_summaries()
+  def perform(%Oban.Job{args: %{"group_id" => group_id}}) do
+    group = Groups.get(group_id)
+
+    if Logbook.entry_number_in_group(group) > 0 do
+      do_send_summary_to_group(group)
+    end
+
+    reschedule_for_group(group)
 
     :ok
   end
 
-  def send_out_group_summaries() do
+  def reschedule_for_all_groups do
     Groups.list()
-    |> Enum.each(&send_summary_to_group/1)
+    |> Enum.each(&reschedule_for_group/1)
+  end
+
+  def reschedule_for_group(%{id: group_id}) do
+    group = Groups.get(group_id)
+
+    %{group_id: group_id}
+    |> new(scheduled_at: Groups.next_daily_report_at(group), replace: [:scheduled_at])
+    |> Oban.insert()
   end
 
   def send_summary_to_group(group) do
@@ -40,13 +55,14 @@ defmodule Exi.DailySummaryWorker do
   end
 
   defp summary_for_user(%{id: user_id, username: username}, %{id: group_id}) do
+    group = Groups.get(group_id)
     group_user = Repo.get_by(GroupUser, user_id: user_id, group_id: group_id)
 
     sum =
       from(e in Entry,
         where:
           e.group_user_id == ^group_user.id and
-            e.inserted_at >= ^DateTimeUtil.beginning_of_day()
+            e.inserted_at >= ^Groups.last_daily_report_at(group)
       )
       |> Repo.aggregate(:sum, :amount) || 0
 
